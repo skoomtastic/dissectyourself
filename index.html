@@ -7,6 +7,63 @@
 <title>DISSECT YOURSELF</title>
 <style>
 
+/* Sketchy floating page icon */
+.page-icon {
+  position: relative;
+  width: 20px;
+  height: 24px;
+  background: #111;                /* dark background */
+  border: 2px solid #ff4c4c;      /* red border */
+  border-radius: 2px;
+  margin-right: 6px;
+  display: inline-block;
+  vertical-align: middle;
+  box-shadow: inset 0 0 0 0.5px #880000;
+
+  /* slow floating motion with subtle side sway */
+  animation: floatPage 4s ease-in-out infinite;
+}
+
+/* Lines on the page */
+.page-icon::before,
+.page-icon::after {
+  content: '';
+  position: absolute;
+  left: 3px;
+  right: 3px;
+  height: 2px;
+  background: #ff4c4c;
+  transform: rotate(-1deg);
+}
+
+.page-icon::before { top: 6px; }
+.page-icon::after { top: 12px; }
+
+/* Extra line for detail */
+.page-icon span {
+  position: absolute;
+  left: 3px;
+  right: 3px;
+  height: 2px;
+  background: #ff4c4c;
+  top: 18px;
+  display: block;
+  transform: rotate(1deg);
+}
+
+/* Smooth floating animation with subtle sway */
+@keyframes floatPage {
+  0%   { transform: translate(0px, 0px) rotate(0deg); }
+  20%  { transform: translate(-1px, -2px) rotate(-0.5deg); }
+  40%  { transform: translate(1px, -1px) rotate(0.3deg); }
+  60%  { transform: translate(-1px, 1px) rotate(-0.2deg); }
+  80%  { transform: translate(1px, 2px) rotate(0.5deg); }
+  100% { transform: translate(0px, 0px) rotate(0deg); }
+}
+
+
+
+
 .site-header {
   display: flex;
   justify-content: center;
@@ -406,7 +463,10 @@ header h1 { font-size:60px; margin:0; text-align:center; letter-spacing:6px; fon
       <span class="text">Art/Story</span>
     </button>
 	
-    <button class="tab" data-target="links">Links</button>
+<button class="tab" data-target="links">
+  <span class="page-icon"><span></span></span>
+  <span class="text">Links</span>
+</button>
   </div>
 
 <!-- FRONT PAGE -->
@@ -656,7 +716,7 @@ for (let i = 0; i < numCopies; i++) {
 
 function drawAll(timestamp) {
     // Partially fade canvas for motion trails
-    ctx.fillStyle = 'rgba(0,0,0,0.2)'; // lower alpha keeps trails
+    ctx.fillStyle = 'rgba(0,0,0,0.05)'; // lower alpha keeps trails
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     if (loadedFrames === totalFrames) {
@@ -697,7 +757,7 @@ function drawAll(timestamp) {
         });
 
         // Twinkling particles
-        for (let j = 0; j < 50; j++) {
+        for (let j = 0; j < 0; j++) {
             ctx.fillStyle = `rgba(255,0,0,${Math.random()})`;
             ctx.beginPath();
             ctx.arc(Math.random() * canvas.width, Math.random() * canvas.height, Math.random() * 2, 0, Math.PI * 2);
