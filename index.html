@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DISSECT YOURSELF — Front Page • Music • Art • Game Reviews • Links</title>
+<link rel="stylesheet" href="css/styles.css"> <!-- if you separate CSS -->
+</head>
+<body>
+<canvas id="grayscaleCanvas"></canvas>
+
+<div class="card">
+  <header class="site-header">
+    <img src="images/dissectyourself2.png" alt="Site Logo">
+  </header>
+
+  <div class="tabs">
+    <button class="tab" aria-selected="true" data-target="front">Front Page</button>
+    <button class="tab" data-target="music">Music</button>
+    <button class="tab" data-target="art">Art/Story</button>
+    <button class="tab" data-target="links">Links</button>
+  </div>
+
+  <!-- PANELS -->
+  <div class="panel active" id="front">
+    <!-- your front page content -->
+  </div>
+  <div class="panel" id="music">
+    <!-- your music panel content -->
+  </div>
+  <div class="panel" id="art">
+    <!-- your art panel content -->
+  </div>
+  <div class="panel" id="links">
+    <!-- your links panel content -->
+  </div>
+</div>
+
+<!-- Art Modal -->
+<div class="art-modal" id="artModal">
+  <div class="art-modal-content">
+    <span class="art-modal-close" id="artModalClose">&times;</span>
+    <img id="modalImage" src="" alt="">
+    <div id="modalText" class="art-text"></div>
+  </div>
+</div>
+
+<script src="js/scripts.js"></script> <!-- if you separate JS -->
+</body>
+</html>
