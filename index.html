@@ -270,8 +270,9 @@ header h1 { font-size:60px; margin:0; text-align:center; letter-spacing:6px; fon
   background: rgba(0,0,0,0.95);
   border: 2px solid #880000;
   border-radius: 10px;
-  padding: 10px;
-  overflow: hidden;
+  padding: 10px 20px 30px 20px; /* top right bottom left */
+  overflow: auto;
+  -webkit-overflow-scrolling: touch; /* smooth scrolling on iOS */
   box-sizing: border-box;
 
   /* Zoom-in effect */
