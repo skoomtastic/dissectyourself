@@ -191,6 +191,24 @@ header h1 { font-size:60px; margin:0; text-align:center; letter-spacing:6px; fon
   display:flex;
   align-items:center;
 }
+
+/* Existing tab styles stay unchanged */
+
+/* Responsive adjustments for small screens */
+@media (max-width: 600px) {
+  .tabs {
+    flex-wrap: wrap;      /* allow tabs to wrap to new line */
+    gap: 10px;            /* slightly smaller spacing */
+    justify-content: center;
+  }
+
+  .tab {
+    padding: 10px 18px;   /* slightly smaller padding */
+    font-size: 14px;      /* make text smaller */
+  }
+}
+
+
 .tab:hover { transform: scale(1.1) skewX(-5deg); }
 .tab[aria-selected="true"] { background:#fff; color:#000; border-color:#ff0000; }
 .tab span.text { position: relative; z-index: 1; }
