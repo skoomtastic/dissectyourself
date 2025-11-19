@@ -261,23 +261,23 @@ header h1 { font-size:60px; margin:0; text-align:center; letter-spacing:6px; fon
   position: relative;
   width: 90vw;
   max-width: 1200px;
-  max-height: 90vh;
+  max-height: 90vh;         /* stay within screen */
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
+  align-items: stretch;     /* allow content to fill width */
+  justify-content: flex-start; /* start from top */
   text-align: center;
   background: rgba(0,0,0,0.95);
   border: 2px solid #880000;
   border-radius: 10px;
-  padding: 10px 20px 30px 20px; /* top right bottom left */
-  overflow: auto;
-  -webkit-overflow-scrolling: touch; /* smooth scrolling on iOS */
+  padding: 10px 20px 20px 20px;
+  overflow-y: auto;         /* enable vertical scroll */
+  -webkit-overflow-scrolling: touch; /* smooth scroll on iOS */
   box-sizing: border-box;
 
   /* Zoom-in effect */
-  transform: scale(0.8);        /* start smaller */
-  opacity: 0;                   /* start invisible */
+  transform: scale(0.8);
+  opacity: 0;
   transition: transform 0.2s ease-out, opacity 0.2s ease-out;
 }
 
@@ -288,10 +288,10 @@ header h1 { font-size:60px; margin:0; text-align:center; letter-spacing:6px; fon
 
 .art-modal-content img {
   max-width: 100%;
-  max-height: 70vh;           /* fit most of the screen */
+  max-height: 70vh;  /* won't exceed 70% of viewport */
   object-fit: contain;
   display: block;
-  margin: 0 auto;
+  margin: 0 auto 12px auto;
   border-radius: 4px;
 }
 .art-modal-content .art-text {
