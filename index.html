@@ -438,6 +438,11 @@ header h1 { font-size:60px; margin:0; text-align:center; letter-spacing:6px; fon
 .featured-single img { max-width:80%; height:auto; border:2px solid #880000; border-radius:6px; box-shadow:0 8px 30px rgba(0,0,0,0.6), 0 0 24px rgba(136,0,0,0.15); transition: transform 0.3s ease; }
 .featured-single img:hover { transform: scale(1.02); }
 
+body.modal-open {
+  overflow: hidden; /* prevent scrolling */
+  /* remove position: fixed and width/height */
+}
+
 </style>
 </head>
 <body>
@@ -627,6 +632,9 @@ const artModal = document.getElementById('artModal');
 const modalImage = document.getElementById('modalImage');
 const modalText = document.getElementById('modalText');
 const modalClose = document.getElementById('artModalClose');
+const modalContent = document.querySelector('.art-modal-content');
+
+let scrollPosition = 0;
 
 document.querySelectorAll('.art-item img').forEach(img => {
   img.addEventListener('click', () => {
@@ -634,11 +642,46 @@ document.querySelectorAll('.art-item img').forEach(img => {
     modalImage.src = img.src;
     modalImage.alt = img.alt;
     modalText.textContent = textDiv ? textDiv.textContent : '';
+
+    // Store scroll position
+    scrollPosition = window.pageYOffset || document.documentElement.scrollTop;
+
+    // Lock scroll by fixing scroll position
+    document.documentElement.style.overflow = 'hidden';
+    document.body.style.top = `-${scrollPosition}px`;
+
     artModal.classList.add('active');
   });
 });
-modalClose.addEventListener('click', () => artModal.classList.remove('active'));
-artModal.addEventListener('click', e => { if(e.target===artModal) artModal.classList.remove('active'); });
+
+const closeModal = () => {
+  artModal.classList.remove('active');
+
+  // Unlock scroll
+  document.documentElement.style.overflow = '';
+  document.body.style.top = '';
+
+  // Restore scroll position
+  window.scrollTo(0, scrollPosition);
+};
+
+modalClose.addEventListener('click', closeModal);
+artModal.addEventListener('click', e => {
+  if (e.target === artModal) closeModal();
+});
+
+// Prevent scroll leak inside modal content
+modalContent.addEventListener('touchstart', function(e) {
+  const scrollTop = this.scrollTop;
+  const scrollHeight = this.scrollHeight;
+  const offsetHeight = this.offsetHeight;
+  const atTop = scrollTop === 0;
+  const atBottom = scrollTop + offsetHeight >= scrollHeight;
+
+  if (atTop) this.scrollTop = 1;
+  if (atBottom) this.scrollTop = scrollHeight - offsetHeight - 1;
+}, {passive: false});
+
 
 // -----------------------------
 // TABS
