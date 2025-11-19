@@ -714,6 +714,13 @@ tabs.forEach(tab => {
   });
 });
 
+// Preload all art images
+const artImages = document.querySelectorAll('.art-item img');
+artImages.forEach(img => {
+  const preloaded = new Image(); // create a new Image object
+  preloaded.src = img.src;       // set its src to preload
+});
+
 // -----------------------------
 // CANVAS BACKGROUND - FRAME ANIMATION
 // -----------------------------
