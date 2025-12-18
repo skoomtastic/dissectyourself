@@ -8,6 +8,16 @@
 <title>DISSECT YOURSELF</title>
 <style>
 
+.world-item {
+  text-align: center;
+}
+
+.world-item h3 {
+  letter-spacing: 3px;
+  margin: 20px 0;
+  text-shadow: 0 0 10px rgba(255,0,0,0.4);
+}
+
 /* Sketchy floating page icon */
 .page-icon {
   position: relative;
@@ -24,6 +34,59 @@
   /* slow floating motion with subtle side sway */
   animation: floatPage 4s ease-in-out infinite;
 }
+
+/* Globe icon */
+.globe-icon {
+  position: relative;
+  width: 24px;
+  height: 24px;
+  border: 2px solid #ff4c4c;
+  border-radius: 50%;
+  margin-right: 6px;
+  display: inline-block;
+  vertical-align: middle;
+  background: #111;
+  animation: floatPage 4s ease-in-out infinite;
+}
+
+/* Latitude lines */
+.globe-icon::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 10%;
+  right: 10%;
+  height: 2px;
+  background: #ff4c4c;
+  transform: translateY(-50%);
+}
+
+/* Longitude line */
+.globe-icon::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 10%;
+  bottom: 10%;
+  width: 2px;
+  background: #ff4c4c;
+  transform: translateX(-50%);
+  border-radius: 50%;
+}
+
+/* Additional latitude lines via spans */
+.globe-icon span {
+  position: absolute;
+  left: 15%;
+  right: 15%;
+  height: 1px;
+  background: #ff4c4c;
+  display: block;
+}
+
+.globe-icon span:nth-child(1) { top: 30%; }
+.globe-icon span:nth-child(2) { top: 70%; }
+
 
 /* Lines on the page */
 .page-icon::before,
@@ -487,6 +550,11 @@ body.modal-open {
       </span>
       <span class="text">Art/Story</span>
     </button>
+
+<button class="tab" data-target="worldbuilding">
+  <span class="globe-icon"><span></span><span></span></span>
+  <span class="text">Worldbuilding</span>
+</button>
 	
 <button class="tab" data-target="links">
   <span class="page-icon"><span></span></span>
@@ -498,6 +566,7 @@ body.modal-open {
 <div class="panel active" id="front">
   <div class="front-intro">
     <p>Sound, vision, and story collide</p>
+	<p>In the aftermath of multiple art projects becoming scattered, I've chosen to compile them into a single website</p>
 	<p><i>To truly know who you are, you've got to <span class="highlight">DISSECT YOURSELF </span>first<i/></p>
   </div>
 </div>
@@ -618,6 +687,26 @@ The man doubled over, vomiting a stream of deep purple fluid that splattered acr
   </div>
 </div>
 
+<div class="panel" id="worldbuilding">
+  <div class="art-grid">
+
+    <div class="art-item world-item">
+      <h3>Korbit</h3>
+      <div class="art-text" style="display:none;">
+		WIP
+      </div>
+    </div>
+
+    <div class="art-item world-item">
+      <h3>The Holy Order</h3>
+      <div class="art-text" style="display:none;">
+		WIP
+      </div>
+    </div>
+
+  </div>
+</div>
+
 
   <div class="panel" id="links"><p>WIP</p></div>
 </div>
@@ -643,20 +732,20 @@ const modalContent = document.querySelector('.art-modal-content');
 
 let scrollPosition = 0;
 
-document.querySelectorAll('.art-item img').forEach(img => {
-  img.addEventListener('click', () => {
-    const textDiv = img.parentElement.querySelector('.art-text');
-    modalImage.src = img.src;
-    modalImage.alt = img.alt;
+document.querySelectorAll('.art-item').forEach(item => {
+  item.addEventListener('click', () => {
+    const img = item.querySelector('img');
+    const textDiv = item.querySelector('.art-text');
+
+    if (img) {
+      modalImage.src = img.src;
+      modalImage.alt = img.alt;
+      modalImage.style.display = 'block';
+    } else {
+      modalImage.style.display = 'none';
+    }
+
     modalText.textContent = textDiv ? textDiv.textContent : '';
-
-    // Store scroll position
-    scrollPosition = window.pageYOffset || document.documentElement.scrollTop;
-
-    // Lock scroll by fixing scroll position
-    document.documentElement.style.overflow = 'hidden';
-    document.body.style.top = `-${scrollPosition}px`;
-
     artModal.classList.add('active');
   });
 });
