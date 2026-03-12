@@ -682,6 +682,7 @@ drawAll(0);
 document.addEventListener('DOMContentLoaded', () => {
 const artModal = document.getElementById('artModal');
 const modalImage = document.getElementById('modalImage');
+const modalTitle = document.getElementById('modalTitle');
 const modalText = document.getElementById('modalText');
 const modalClose = document.getElementById('artModalClose');
 const modalContent = document.querySelector('.art-modal-content');
@@ -692,6 +693,8 @@ document.querySelectorAll('.art-item').forEach(item => {
     scrollPosition = window.scrollY || window.pageYOffset;
 
     const img = item.querySelector('img');
+    const h3 = item.querySelector('h3');
+    modalTitle.textContent = h3 ? h3.textContent : '';
     if (img) { modalImage.src = img.src; modalImage.alt = img.alt; modalImage.style.display = 'block'; }
     else { modalImage.style.display = 'none'; }
 
@@ -758,6 +761,7 @@ if (!sessionStorage.getItem("logofadedone")) {
 <div class="art-modal" id="artModal">
   <div class="art-modal-content">
     <span class="art-modal-close" id="artModalClose">&times;</span>
+    <div id="modalTitle" style="text-align:center; font-size:20px; font-weight:bold; letter-spacing:2px; color:#ffffff; margin-bottom:10px;"></div>
     <img id="modalImage" src="" alt="">
     <div id="modalText" class="art-text"></div>
   </div>
