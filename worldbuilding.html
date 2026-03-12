@@ -394,37 +394,41 @@ artModal.addEventListener('click', e => { if (e.target === artModal) closeModal(
 }); // end DOMContentLoaded
 </script>
 
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const container = document.getElementById('worldGrid');
+  const toggleBtn = document.getElementById('worldSearchToggle');
+  const search = document.getElementById('worldSearch');
+  const items = Array.from(container.querySelectorAll('.world-item'));
+  const originalOrder = [...items];
+  const normalize = t => t.toLowerCase().replace(/^(the|a|an)\s+/i,'').normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+  let searchActive = false;
 
-// Search
-const container = document.getElementById('worldGrid');
-const toggleBtn = document.getElementById('worldSearchToggle');
-const search = document.getElementById('worldSearch');
-const items = Array.from(container.querySelectorAll('.world-item'));
-const originalOrder = [...items];
-const normalize = t => t.toLowerCase().replace(/^(the|a|an)\s+/i,'').normalize('NFD').replace(/[\u0300-\u036f]/g,'');
-let searchActive = false;
-function render(list, withHeaders) {
-  container.innerHTML = '';
-  let cur = '';
-  list.forEach(item => {
-    if (withHeaders) {
-      const letter = normalize(item.querySelector('h3').textContent).charAt(0).toUpperCase();
-      if (letter !== cur) { cur = letter; const h = document.createElement('div'); h.className='az-header'; h.textContent=letter; container.appendChild(h); }
-    }
-    container.appendChild(item);
+  function render(list, withHeaders) {
+    container.innerHTML = '';
+    let cur = '';
+    list.forEach(item => {
+      if (withHeaders) {
+        const letter = normalize(item.querySelector('h3').textContent).charAt(0).toUpperCase();
+        if (letter !== cur) { cur = letter; const h = document.createElement('div'); h.className='az-header'; h.textContent=letter; container.appendChild(h); }
+      }
+      container.appendChild(item);
+    });
+  }
+
+  toggleBtn.addEventListener('click', () => {
+    searchActive = !searchActive;
+    if (searchActive) {
+      toggleBtn.textContent = 'CLOSE'; search.hidden = false; search.value = ''; search.focus();
+      render([...originalOrder].sort((a,b)=>normalize(a.querySelector('h3').textContent).localeCompare(normalize(b.querySelector('h3').textContent))), true);
+    } else { toggleBtn.textContent = 'SEARCH'; search.hidden = true; render(originalOrder, false); }
   });
-}
-toggleBtn.addEventListener('click', () => {
-  searchActive = !searchActive;
-  if (searchActive) {
-    toggleBtn.textContent = 'CLOSE'; search.hidden = false; search.value = ''; search.focus();
-    render([...originalOrder].sort((a,b)=>normalize(a.querySelector('h3').textContent).localeCompare(normalize(b.querySelector('h3').textContent))), true);
-  } else { toggleBtn.textContent = 'SEARCH'; search.hidden = true; render(originalOrder, false); }
-});
-search.addEventListener('input', e => {
-  const term = normalize(e.target.value);
-  const filtered = originalOrder.filter(i=>normalize(i.querySelector('h3').textContent).includes(term)).sort((a,b)=>normalize(a.querySelector('h3').textContent).localeCompare(normalize(b.querySelector('h3').textContent)));
-  render(filtered, true);
+
+  search.addEventListener('input', e => {
+    const term = normalize(e.target.value);
+    const filtered = originalOrder.filter(i=>normalize(i.querySelector('h3').textContent).includes(term)).sort((a,b)=>normalize(a.querySelector('h3').textContent).localeCompare(normalize(b.querySelector('h3').textContent)));
+    render(filtered, true);
+  });
 });
 </script>
 
