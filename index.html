@@ -106,10 +106,10 @@ html, body { margin: 0; padding: 0; font-family: 'Share Tech Mono', monospace; f
 #grayscaleCanvas { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 0; }
 
 .card {
-  margin: 40px auto; max-width: 1400px; width: 95%; padding: 30px;
+  margin: 0; max-width: 100%; width: 100%; padding: 30px;
   background: rgba(0,0,0,0.85); border: 4px solid #880000; backdrop-filter: blur(8px);
   position: relative; z-index: 2;
-  animation: cardglow 4s ease-in-out infinite alternate, cardfloat 6s ease-in-out infinite alternate;
+  animation: cardglow 4s ease-in-out infinite alternate;
 }
 @keyframes cardglow { 0%{box-shadow:0 0 80px #440000,inset 0 0 35px #220000;} 50%{box-shadow:0 0 100px #550000,inset 0 0 45px #330000;} 100%{box-shadow:0 0 80px #440000,inset 0 0 35px #220000;} }
 @keyframes cardfloat { 0%{transform:translateY(0px);} 50%{transform:translateY(-6px);} 100%{transform:translateY(0px);} }
@@ -248,6 +248,22 @@ header h1 { font-size:60px; margin:0; text-align:center; letter-spacing:6px; fon
 .world-item { text-align: center; }
 .world-item h3 { letter-spacing: 3px; margin: 20px 0; text-shadow: 0 0 10px rgba(255,0,0,0.4); }
 
+
+/* Chains — attached to top corners of the card */
+.chain-left, .chain-right {
+  position: absolute;
+  width: 350px;
+  height: 350px;
+  background: url('images/chains.png') top right / contain no-repeat;
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0.6;
+  mix-blend-mode: luminosity;
+  filter: sepia(0.6) hue-rotate(320deg) saturate(1.4) brightness(0.55);
+}
+.chain-left  { left: 0; top: 40px; transform: translateX(-100%); }
+.chain-right { right: 0; top: 40px; transform: translateX(100%) scaleX(-1); background-position: top left; }
+
 </style>
 
 <title>Front Page — DISSECT YOURSELF</title>
@@ -255,7 +271,11 @@ header h1 { font-size:60px; margin:0; text-align:center; letter-spacing:6px; fon
 </head>
 <body>
 <canvas id="grayscaleCanvas"></canvas>
-<div class="card">
+
+<div style="position:relative; max-width:1400px; width:95%; margin:40px auto; animation: cardfloat 6s ease-in-out infinite alternate;">
+<div class="chain-left"></div>
+<div class="chain-right"></div>
+<div class="card" style="margin:0;">
   <header class="site-header">
     <a href="/"><img src="images/dissectyourself2.png" alt="DISSECT YOURSELF"></a>
   </header>
@@ -274,83 +294,403 @@ header h1 { font-size:60px; margin:0; text-align:center; letter-spacing:6px; fon
 
   </div>
 </div>
+</div>
 
 <script>
 const canvas = document.getElementById('grayscaleCanvas');
 const ctx = canvas.getContext('2d');
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
-const totalFrames = 89;
-const frames = [];
-let loadedFrames = 0;
-let frameIndex = 0;
-const fps = 30;
-const frameDuration = 1000 / fps;
-let lastFrameTime = 0;
 
-// Restore frame index from sessionStorage
-const savedState = JSON.parse(sessionStorage.getItem('canvasState') || 'null');
-if (savedState) frameIndex = savedState.frameIndex || 0;
-
-for (let i = 0; i < totalFrames; i++) {
-    const img = new Image();
-    img.src = `images/gifFrames/brand/${i}.png`;
-    img.onload = () => { loadedFrames++; if (loadedFrames === totalFrames) requestAnimationFrame(drawAll); };
-    frames.push(img);
+function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
 }
-const trail = [];
-document.addEventListener('mousemove', e => { trail.push({x: e.clientX, y: e.clientY}); if (trail.length > 200) trail.shift(); });
+resizeCanvas();
+// resize handled in placeEyes listener
 
-// Restore or generate copy positions
-const copies = [];
-const numCopies = 30;
-if (savedState && savedState.copies && savedState.copies.length === numCopies) {
-    savedState.copies.forEach(c => copies.push({...c}));
-} else {
-    for (let i = 0; i < numCopies; i++) {
-        copies.push({ x: Math.random() * canvas.width, y: Math.random() * canvas.height, vx: (Math.random() - 0.5) * 2, vy: (Math.random() - 0.5) * 2, scale: 0.4 + Math.random() * 0.3 });
+// ── Grid ─────────────────────────────────────────────────
+const GRID_SIZE = 40;
+const BASE_COLOR = 'rgba(136, 0, 0,';
+
+function drawGrid(timestamp) {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    const pulse = 0.08 + (Math.sin(timestamp / 2000) * 0.5 + 0.5) * 0.10;
+    ctx.strokeStyle = `${BASE_COLOR} ${pulse})`;
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    for (let x = 0; x <= canvas.width; x += GRID_SIZE) {
+        ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height);
+    }
+    for (let y = 0; y <= canvas.height; y += GRID_SIZE) {
+        ctx.moveTo(0, y); ctx.lineTo(canvas.width, y);
+    }
+    ctx.stroke();
+    const dotPulse = 0.1 + (Math.sin(timestamp / 1500 + 1) * 0.5 + 0.5) * 0.15;
+    ctx.fillStyle = `rgba(180, 0, 0, ${dotPulse})`;
+    for (let x = 0; x <= canvas.width; x += GRID_SIZE) {
+        for (let y = 0; y <= canvas.height; y += GRID_SIZE) {
+            ctx.beginPath();
+            ctx.arc(x, y, 1.5, 0, Math.PI * 2);
+            ctx.fill();
+        }
     }
 }
 
-// Save state when leaving the page
-window.addEventListener('pagehide', () => {
-    sessionStorage.setItem('canvasState', JSON.stringify({ frameIndex, copies }));
-});
+// ── Eyes ─────────────────────────────────────────────────
+const eyePairs = [];
 
+function makeEye(x, y, size, blinkOffset) {
+    return {
+        x, y, size,
+        glowIntensity: 0.7 + Math.random() * 0.3,
+        nextBlink: blinkOffset,
+        blinkTimer: 0,
+        isBlinking: false,
+        blinkDuration: 150 + Math.random() * 100
+    };
+}
+
+function placeEyes() {
+    eyePairs.length = 0;
+    const W = canvas.width;
+    const H = canvas.height;
+
+    const cardW = Math.min(W * 0.95, 1400);
+    const cardLeft  = (W - cardW) / 2;
+    const cardRight = cardLeft + cardW;
+
+    const rows = 8;
+    const size = 24;
+    const rowH = H / rows;
+
+    // Zigzag: alternate between two x positions per side
+    function addSide(xA, xB) {
+        for (let r = 0; r < rows; r++) {
+            const x = (r % 2 === 0) ? xA : xB;
+            const y = rowH * r + rowH / 2;
+            eyePairs.push(makeEye(x, y, size, 1000 + Math.random() * 6000));
+        }
+    }
+
+    // Left gutter zigzag
+    const leftMid = cardLeft / 2;
+    addSide(leftMid - cardLeft * 0.18, leftMid + cardLeft * 0.18);
+
+    // Right gutter zigzag
+    const rightMid = cardRight + (W - cardRight) / 2;
+    const rw = (W - cardRight);
+    addSide(rightMid - rw * 0.18, rightMid + rw * 0.18);
+}
+
+placeEyes();
+window.addEventListener('resize', () => { resizeCanvas(); placeEyes(); });
+
+function drawBerserkMark(cx, cy, r, alpha) {
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    ctx.strokeStyle = 'rgba(5, 0, 0, 1)';
+    ctx.fillStyle = 'rgba(5, 0, 0, 1)';
+    ctx.lineWidth = r * 0.13;
+    ctx.lineJoin = 'miter';
+    ctx.miterLimit = 10;
+
+    // The mark is taller than wide — scale vertically
+    const w = r * 0.75;   // half-width of diamonds
+    const dh = r * 0.55;  // half-height of each diamond
+
+    // Centre dividing point between the two diamonds
+    const mid = cy;
+    // Top diamond — inverted (point up, wide in middle, point down at mid)
+    const topTip  = mid - dh * 1.85; // top point
+    const topMidY = mid - dh * 0.55; // widest point
+    const topBot  = mid;             // bottom point (shared with bottom diamond top)
+
+    // Bottom diamond — normal (point up at mid, wide in middle, point down)
+    const botTop  = mid;
+    const botMidY = mid + dh * 0.85;
+    const botTip  = mid + dh * 1.85;
+
+    // Draw top diamond outline — open at top (no line across the top point)
+    ctx.beginPath();
+    ctx.moveTo(cx - w, topMidY);
+    ctx.lineTo(cx, topBot);
+    ctx.lineTo(cx + w, topMidY);
+    ctx.stroke();
+
+    // Draw bottom diamond outline
+    ctx.beginPath();
+    ctx.moveTo(cx, botTop);
+    ctx.lineTo(cx + w, botMidY);
+    ctx.lineTo(cx, botTip);
+    ctx.lineTo(cx - w, botMidY);
+    ctx.closePath();
+    ctx.stroke();
+
+    // Top section: two lines from center outward + horn extensions from wide points
+    ctx.lineWidth = r * 0.08;
+    // Left diagonal from center to wide point
+    ctx.beginPath();
+    ctx.moveTo(cx, topBot);
+    ctx.lineTo(cx - w, topMidY);
+    ctx.stroke();
+    // Right diagonal from center to wide point
+    ctx.beginPath();
+    ctx.moveTo(cx, topBot);
+    ctx.lineTo(cx + w, topMidY);
+    ctx.stroke();
+    // Left horn: short extension upward and inward from wide point
+    ctx.beginPath();
+    ctx.moveTo(cx - w, topMidY);
+    ctx.lineTo(cx - w * 0.55, topTip + (topMidY - topTip) * 0.45);
+    ctx.stroke();
+    // Right horn: short extension upward and inward from wide point
+    ctx.beginPath();
+    ctx.moveTo(cx + w, topMidY);
+    ctx.lineTo(cx + w * 0.55, topTip + (topMidY - topTip) * 0.45);
+    ctx.stroke();
+
+    // Diagonal cross lines through bottom diamond
+    ctx.lineWidth = r * 0.08;
+    ctx.beginPath();
+    ctx.moveTo(cx - w, botMidY);
+    ctx.lineTo(cx, botTop);
+    ctx.moveTo(cx + w, botMidY);
+    ctx.lineTo(cx, botTop);
+    ctx.moveTo(cx - w, botMidY);
+    ctx.lineTo(cx, botTip);
+    ctx.moveTo(cx + w, botMidY);
+    ctx.lineTo(cx, botTip);
+    ctx.stroke();
+
+    // Central vertical spine
+    ctx.lineWidth = r * 0.09;
+    ctx.beginPath();
+    ctx.moveTo(cx, botTip);
+    ctx.lineTo(cx, topTip - r * 0.05);
+    ctx.stroke();
+
+    // Triple fork at top — center spike + two side prongs
+    const forkBase = topTip + r * 0.18;
+    const forkLen  = r * 0.38;
+    const forkSpread = r * 0.28;
+    ctx.lineWidth = r * 0.07;
+    ctx.lineCap = 'round';
+    // Center prong
+    ctx.beginPath();
+    ctx.moveTo(cx, forkBase);
+    ctx.lineTo(cx, forkBase - forkLen);
+    ctx.stroke();
+    // Left prong
+    ctx.beginPath();
+    ctx.moveTo(cx, forkBase);
+    ctx.lineTo(cx - forkSpread, forkBase - forkLen * 0.7);
+    ctx.stroke();
+    // Right prong
+    ctx.beginPath();
+    ctx.moveTo(cx, forkBase);
+    ctx.lineTo(cx + forkSpread, forkBase - forkLen * 0.7);
+    ctx.stroke();
+
+    ctx.globalAlpha = 1;
+    ctx.restore();
+}
+
+function drawEye(x, y, size, openAmount, glowIntensity) {
+    if (openAmount < 0.02) return;
+    const w = size * 2.4;
+    const h = size * 1.1 * openAmount;
+
+    ctx.save();
+
+    // Ominous outer dark halo
+    const halo = ctx.createRadialGradient(x, y, size * 0.5, x, y, size * 4.5);
+    halo.addColorStop(0, `rgba(80, 0, 0, ${0.22 * glowIntensity})`);
+    halo.addColorStop(0.5, `rgba(30, 0, 0, ${0.12 * glowIntensity})`);
+    halo.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = halo;
+    ctx.beginPath();
+    ctx.ellipse(x, y, size * 4.5, size * 4.5, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Eye socket shadow
+    const socket = ctx.createRadialGradient(x, y, size * 0.8, x, y, size * 2.5);
+    socket.addColorStop(0, 'rgba(0,0,0,0)');
+    socket.addColorStop(1, `rgba(0, 0, 0, ${0.7 * glowIntensity})`);
+    ctx.fillStyle = socket;
+    ctx.beginPath();
+    ctx.ellipse(x, y, size * 2.5, size * 1.8, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Clip to eye opening shape
+    ctx.beginPath();
+    ctx.moveTo(x - w/2, y);
+    ctx.bezierCurveTo(x - w/2 + w*0.1, y - h * 1.1, x + w/2 - w*0.1, y - h * 1.1, x + w/2, y);
+    ctx.bezierCurveTo(x + w/2 - w*0.1, y + h * 0.7, x - w/2 + w*0.1, y + h * 0.7, x - w/2, y);
+    ctx.closePath();
+    ctx.clip();
+
+    // Sclera — yellowed, diseased
+    const scleraGrad = ctx.createRadialGradient(x, y, 0, x, y, w * 0.6);
+    scleraGrad.addColorStop(0,   `rgba(210, 195, 160, ${glowIntensity})`);
+    scleraGrad.addColorStop(0.5, `rgba(190, 165, 130, ${glowIntensity})`);
+    scleraGrad.addColorStop(1,   `rgba(150, 110, 90, ${glowIntensity})`);
+    ctx.fillStyle = scleraGrad;
+    ctx.fillRect(x - w, y - h * 2, w * 2, h * 4);
+
+    // Iris — deep amber-to-red
+    const irisR = size * 0.58;
+    const irisGrad = ctx.createRadialGradient(x, y, 0, x, y, irisR);
+    irisGrad.addColorStop(0,    `rgba(200, 60, 0, ${glowIntensity})`);
+    irisGrad.addColorStop(0.25, `rgba(160, 20, 0, ${glowIntensity})`);
+    irisGrad.addColorStop(0.6,  `rgba(100, 5, 0, ${glowIntensity})`);
+    irisGrad.addColorStop(0.85, `rgba(60, 0, 0, ${glowIntensity})`);
+    irisGrad.addColorStop(1,    `rgba(20, 0, 0, ${glowIntensity})`);
+    ctx.beginPath();
+    ctx.arc(x, y, irisR, 0, Math.PI * 2);
+    ctx.fillStyle = irisGrad;
+    ctx.fill();
+
+    // Iris radial lines
+    for (let i = 0; i < 18; i++) {
+        const a = (i / 18) * Math.PI * 2;
+        ctx.beginPath();
+        ctx.moveTo(x + Math.cos(a) * irisR * 0.28, y + Math.sin(a) * irisR * 0.28);
+        ctx.lineTo(x + Math.cos(a) * irisR * 0.92, y + Math.sin(a) * irisR * 0.92);
+        ctx.strokeStyle = `rgba(180, 30, 0, ${0.18 * glowIntensity})`;
+        ctx.lineWidth = 0.5;
+        ctx.stroke();
+    }
+
+    // Berserk brand inside iris
+    drawBerserkMark(x, y, irisR * 0.62, glowIntensity * 0.85);
+
+    // Round pupil — red glow emanating from center
+    const pupilR = irisR * 0.22;
+    ctx.beginPath();
+    ctx.arc(x, y, pupilR, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(2, 0, 0, ${glowIntensity})`;
+    ctx.fill();
+
+    // Pupil red glow
+    const pGlow = ctx.createRadialGradient(x, y, 0, x, y, pupilR * 2.5);
+    pGlow.addColorStop(0, `rgba(255, 30, 0, ${0.5 * glowIntensity})`);
+    pGlow.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = pGlow;
+    ctx.beginPath();
+    ctx.arc(x, y, pupilR * 2.5, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Catchlight
+    ctx.beginPath();
+    ctx.arc(x - size * 0.15, y - size * 0.18, size * 0.055, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(255, 220, 200, ${0.75 * glowIntensity})`;
+    ctx.fill();
+
+    ctx.restore();
+
+    // Eyelids
+    ctx.save();
+    ctx.beginPath();
+    ctx.moveTo(x - w/2, y);
+    ctx.bezierCurveTo(x - w/2 + w*0.1, y - h * 1.1, x + w/2 - w*0.1, y - h * 1.1, x + w/2, y);
+    ctx.strokeStyle = `rgba(15, 0, 0, ${glowIntensity})`;
+    ctx.lineWidth = 2.5;
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(x - w/2, y);
+    ctx.bezierCurveTo(x - w/2 + w*0.1, y + h * 0.7, x + w/2 - w*0.1, y + h * 0.7, x + w/2, y);
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+
+    // Upper crease
+    ctx.beginPath();
+    ctx.moveTo(x - w/2 - size*0.1, y - h * 0.3);
+    ctx.bezierCurveTo(x - w/4, y - h * 1.6, x + w/4, y - h * 1.6, x + w/2 + size*0.1, y - h * 0.3);
+    ctx.strokeStyle = `rgba(0, 0, 0, ${0.5 * glowIntensity})`;
+    ctx.lineWidth = 3;
+    ctx.stroke();
+
+    // Lashes
+    ctx.strokeStyle = `rgba(10, 0, 0, ${0.95 * glowIntensity})`;
+    for (let i = 0; i < 11; i++) {
+        const t = (i + 0.5) / 11;
+        const lx = x - w/2 + t * w;
+        const lidY = y - h * 1.1 * (1 - 4*(t-0.5)*(t-0.5));
+        const spread = (t - 0.5) * 0.9;
+        const lashLen = size * (0.25 + Math.abs(t - 0.5) * 0.3);
+        ctx.lineWidth = 1 + Math.abs(t - 0.5);
+        ctx.beginPath();
+        ctx.moveTo(lx, lidY);
+        ctx.lineTo(lx + Math.sin(spread) * lashLen * 0.4,
+                   lidY - Math.cos(spread * 0.3) * lashLen * openAmount);
+        ctx.stroke();
+    }
+    ctx.restore();
+}
+
+function drawEyePairs(timestamp, dt) {
+    for (let p of eyePairs) {
+        p.blinkTimer += dt;
+        let openAmount = 1;
+        if (!p.isBlinking) {
+            if (p.blinkTimer >= p.nextBlink) {
+                p.isBlinking = true;
+                p.blinkTimer = 0;
+            }
+        } else {
+            const half = p.blinkDuration / 2;
+            openAmount = p.blinkTimer < half
+                ? 1 - (p.blinkTimer / half)
+                : (p.blinkTimer - half) / half;
+            if (p.blinkTimer >= p.blinkDuration) {
+                p.isBlinking = false;
+                p.blinkTimer = 0;
+                p.nextBlink = 2000 + Math.random() * 7000;
+            }
+        }
+        openAmount = Math.max(0.01, openAmount);
+        drawEye(p.x, p.y, p.size, openAmount, p.glowIntensity);
+    }
+}
+
+// ── Main loop ─────────────────────────────────────────────
+let lastTime = 0;
 function drawAll(timestamp) {
-    ctx.fillStyle = 'rgba(0,0,0,0.05)';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    if (loadedFrames === totalFrames) {
-        if (timestamp - lastFrameTime > frameDuration) { frameIndex = (frameIndex + 1) % totalFrames; lastFrameTime = timestamp; }
-        const frame = frames[frameIndex];
-        copies.forEach((c, i) => {
-            ctx.save();
-            const w = frame.width * c.scale;
-            const h = frame.height * c.scale;
-            ctx.translate(c.x + w / 2, c.y + h / 2);
-            ctx.rotate(Math.sin(timestamp / 500 + i) * 0.1);
-            const currentScale = c.scale + Math.sin(timestamp / 400 + i) * 0.05;
-            ctx.shadowColor = 'rgba(255,0,0,0.5)';
-            ctx.shadowBlur = 20;
-            ctx.drawImage(frame, -w / 2, -h / 2, w * (currentScale / c.scale), h * (currentScale / c.scale));
-            ctx.restore();
-            c.x += c.vx; c.y += c.vy;
-            if (c.x < 0 || c.x + w > canvas.width) c.vx *= -1;
-            if (c.y < 0 || c.y + h > canvas.height) c.vy *= -1;
-        });
-    }
+    const dt = timestamp - lastTime;
+    lastTime = timestamp;
+    drawGrid(timestamp);
+    drawEyePairs(timestamp, dt);
     requestAnimationFrame(drawAll);
 }
-window.addEventListener('resize', () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; });
+
+drawAll(0);
 </script>
 
 
 
 <script>
 const logoEl = document.querySelector(".site-header img");
+const GLOW_DUR = 3000;
+const GLITCH_DUR = 4000;
+const now = Date.now();
+
+if (!sessionStorage.getItem("animStart")) {
+  sessionStorage.setItem("animStart", now);
+}
+
+const animStart = parseInt(sessionStorage.getItem("animStart"));
+const elapsed = now - animStart;
+
+// Negative delay jumps the animation to the right point in the cycle
+const glowDelay   = -((elapsed % GLOW_DUR) / 1000).toFixed(3);
+const glitchDelay = -((elapsed % GLITCH_DUR) / 1000).toFixed(3);
+
 if (!sessionStorage.getItem("logofadedone")) {
   logoEl.style.animation = "fadeIn 1.2s ease-out, pulseGlow 3s ease-in-out infinite, glitch 4s infinite";
+  logoEl.style.animationDelay = "0s, " + glowDelay + "s, " + glitchDelay + "s";
   sessionStorage.setItem("logofadedone", "1");
+} else {
+  logoEl.style.animation = "pulseGlow 3s ease-in-out infinite, glitch 4s infinite";
+  logoEl.style.animationDelay = glowDelay + "s, " + glitchDelay + "s";
 }
 </script>
 </body>
