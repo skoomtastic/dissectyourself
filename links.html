@@ -72,7 +72,7 @@
 .site-header img {
   height: 200px; width: auto;
   filter: drop-shadow(0 0 8px rgba(255,0,0,0.4));
-  animation: fadeIn 1.2s ease-out, pulseGlow 3s ease-in-out infinite, glitch 4s infinite;
+  animation: pulseGlow 3s ease-in-out infinite, glitch 4s infinite;
   position: relative; z-index: 2;
 }
 @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
@@ -101,7 +101,7 @@
 @keyframes scan { 0% { background-position-y: 0px; } 100% { background-position-y: 200px; } }
 
 * { box-sizing: border-box; }
-html, body { margin: 0; padding: 0; font-family: 'Share Tech Mono', monospace; background: #000; overflow-x: hidden; min-height: 100vh; }
+html, body { margin: 0; padding: 0; font-family: 'Share Tech Mono', monospace; font-weight: 400; background: #000; overflow-x: hidden; min-height: 100vh; }
 
 #grayscaleCanvas { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 0; }
 
@@ -322,5 +322,12 @@ window.addEventListener('resize', () => { canvas.width = window.innerWidth; canv
 </script>
 
 
+<script>
+const logoEl = document.querySelector(".site-header img");
+if (!sessionStorage.getItem("logofadedone")) {
+  logoEl.style.animation = "fadeIn 1.2s ease-out, pulseGlow 3s ease-in-out infinite, glitch 4s infinite";
+  sessionStorage.setItem("logofadedone", "1");
+}
+</script>
 </body>
 </html>
