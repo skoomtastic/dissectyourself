@@ -280,14 +280,7 @@ header h1 { font-size:60px; margin:0; text-align:center; letter-spacing:6px; fon
   <div class="art-item world-item"><h3>Nästen</h3><div class="art-text" style="display:none;">WIP</div></div>
 </div>
 
-<!-- World Modal -->
-<div class="art-modal" id="artModal">
-  <div class="art-modal-content">
-    <span class="art-modal-close" id="artModalClose">&times;</span>
-    <img id="modalImage" src="" alt="" style="display:none;">
-    <div id="modalText" class="art-text"></div>
-  </div>
-</div>
+
 
   </div>
 </div>
@@ -304,6 +297,11 @@ let frameIndex = 0;
 const fps = 30;
 const frameDuration = 1000 / fps;
 let lastFrameTime = 0;
+
+// Restore frame index from sessionStorage
+const savedState = JSON.parse(sessionStorage.getItem('canvasState') || 'null');
+if (savedState) frameIndex = savedState.frameIndex || 0;
+
 for (let i = 0; i < totalFrames; i++) {
     const img = new Image();
     img.src = `images/gifFrames/brand/${i}.png`;
@@ -312,11 +310,23 @@ for (let i = 0; i < totalFrames; i++) {
 }
 const trail = [];
 document.addEventListener('mousemove', e => { trail.push({x: e.clientX, y: e.clientY}); if (trail.length > 200) trail.shift(); });
+
+// Restore or generate copy positions
 const copies = [];
 const numCopies = 30;
-for (let i = 0; i < numCopies; i++) {
-    copies.push({ x: Math.random() * canvas.width, y: Math.random() * canvas.height, vx: (Math.random() - 0.5) * 2, vy: (Math.random() - 0.5) * 2, scale: 0.4 + Math.random() * 0.3 });
+if (savedState && savedState.copies && savedState.copies.length === numCopies) {
+    savedState.copies.forEach(c => copies.push({...c}));
+} else {
+    for (let i = 0; i < numCopies; i++) {
+        copies.push({ x: Math.random() * canvas.width, y: Math.random() * canvas.height, vx: (Math.random() - 0.5) * 2, vy: (Math.random() - 0.5) * 2, scale: 0.4 + Math.random() * 0.3 });
+    }
 }
+
+// Save state when leaving the page
+window.addEventListener('pagehide', () => {
+    sessionStorage.setItem('canvasState', JSON.stringify({ frameIndex, copies }));
+});
+
 function drawAll(timestamp) {
     ctx.fillStyle = 'rgba(0,0,0,0.05)';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -345,24 +355,45 @@ window.addEventListener('resize', () => { canvas.width = window.innerWidth; canv
 </script>
 
 
+
+
 <script>
-// Modal
+document.addEventListener('DOMContentLoaded', () => {
 const artModal = document.getElementById('artModal');
 const modalImage = document.getElementById('modalImage');
 const modalText = document.getElementById('modalText');
 const modalClose = document.getElementById('artModalClose');
+
+let scrollPosition = 0;
+
 document.querySelectorAll('.art-item').forEach(item => {
   item.addEventListener('click', () => {
+    scrollPosition = window.scrollY || window.pageYOffset;
+
     const img = item.querySelector('img');
     const textDiv = item.querySelector('.art-text');
-    if (img) { modalImage.src = img.src; modalImage.style.display = 'block'; } else { modalImage.style.display = 'none'; }
+    if (img) { modalImage.src = img.src; modalImage.alt = img.alt; modalImage.style.display = 'block'; }
+    else { modalImage.style.display = 'none'; }
     modalText.textContent = textDiv ? textDiv.textContent : '';
+
+    document.body.style.overflow = 'hidden';
+    document.documentElement.style.overflow = 'hidden';
     artModal.classList.add('active');
   });
 });
-const closeModal = () => artModal.classList.remove('active');
+
+const closeModal = () => {
+  artModal.classList.remove('active');
+  document.body.style.overflow = '';
+  document.documentElement.style.overflow = '';
+  window.scrollTo(0, scrollPosition);
+};
+
 modalClose.addEventListener('click', closeModal);
 artModal.addEventListener('click', e => { if (e.target === artModal) closeModal(); });
+}); // end DOMContentLoaded
+</script>
+
 
 // Search
 const container = document.getElementById('worldGrid');
@@ -404,5 +435,13 @@ if (!sessionStorage.getItem("logofadedone")) {
   sessionStorage.setItem("logofadedone", "1");
 }
 </script>
+<!-- World Modal -->
+<div class="art-modal" id="artModal">
+  <div class="art-modal-content">
+    <span class="art-modal-close" id="artModalClose">&times;</span>
+    <img id="modalImage" src="" alt="" style="display:none;">
+    <div id="modalText" class="art-text"></div>
+  </div>
+</div>
 </body>
 </html>
