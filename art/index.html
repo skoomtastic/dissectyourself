@@ -377,9 +377,13 @@ function placeEyes() {
     const size = 24;
     const rowH = H / rows;
 
+    // Spread eyes over full document height so they cover long pages
+    const docH = Math.max(document.body.scrollHeight, H);
+    const totalRows = Math.max(rows, Math.ceil(docH / rowH));
+
     // Zigzag: alternate between two x positions per side
     function addSide(xA, xB) {
-        for (let r = 0; r < rows; r++) {
+        for (let r = 0; r < totalRows; r++) {
             const x = (r % 2 === 0) ? xA : xB;
             const y = rowH * r + rowH / 2;
             eyePairs.push(makeEye(x, y, size, 1000 + Math.random() * 6000));
@@ -398,6 +402,14 @@ function placeEyes() {
 
 placeEyes();
 window.addEventListener('resize', () => { resizeCanvas(); placeEyes(); });
+window.addEventListener('scroll', () => { /* canvas is fixed; eyes offset by scrollY in draw */ });
+
+// Re-run placeEyes whenever document height changes (e.g. modals, expanding content)
+let _lastDocH = document.body.scrollHeight;
+new ResizeObserver(() => {
+    const h = document.body.scrollHeight;
+    if (h !== _lastDocH) { _lastDocH = h; placeEyes(); }
+}).observe(document.body);
 
 function drawBerserkMark(cx, cy, r, alpha) {
     ctx.save();
@@ -663,7 +675,12 @@ function drawEyePairs(timestamp, dt) {
             }
         }
         openAmount = Math.max(0.01, openAmount);
-        drawEye(p.x, p.y, p.size, openAmount, p.glowIntensity);
+        // Offset y by scrollY so eyes stay fixed on screen as page scrolls
+        const screenY = p.y - window.scrollY;
+        // Only draw if eye is within viewport (performance)
+        if (screenY > -p.size * 3 && screenY < canvas.height + p.size * 3) {
+            drawEye(p.x, screenY, p.size, openAmount, p.glowIntensity);
+        }
     }
 }
 
