@@ -322,6 +322,52 @@ header h1 { font-size:60px; margin:0; text-align:center; letter-spacing:6px; fon
 .now-playing-label { font-size: 9px; letter-spacing: 4px; color: #aa3333; }
 .now-playing-track { font-size: 16px; font-weight: bold; letter-spacing: 2px; color: #fff; text-shadow: 0 0 8px rgba(255,255,255,0.3); }
 .now-playing-artist { font-size: 12px; letter-spacing: 2px; color: #aaa; }
+
+@media (max-width: 600px) {
+  /* Header: stack logo above vinyl on mobile */
+  .site-header {
+    display: flex !important;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 10px !important;
+  }
+  .site-header > a { grid-column: unset; }
+  .site-header > .now-playing { grid-column: unset; justify-self: unset; }
+
+  /* Shrink vinyl on mobile */
+  .vinyl-wrap, .vinyl { width: 80px !important; height: 80px !important; }
+  .vinyl-cover { width: 32px !important; height: 32px !important; }
+  .now-playing-track { font-size: 13px !important; }
+  .now-playing-artist { font-size: 11px !important; }
+
+  /* Art grid: force 2 columns */
+  .art-grid, .album-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+  /* CONDEMNED spans both columns */
+  .art-item[style*="grid-column"] { grid-column: 1 / -1 !important; }
+
+  /* Top 10 title: allow wrapping, smaller font */
+  .top10-title {
+    font-size: 18px !important;
+    white-space: normal !important;
+    word-break: break-word !important;
+    line-height: 1.2 !important;
+  }
+  .top10-rank { font-size: 28px !important; min-width: 32px !important; }
+  .top10-entry:nth-child(1) .top10-rank { font-size: 32px !important; }
+  .top10-entry:nth-child(2) .top10-rank { font-size: 30px !important; }
+  .top10-entry:nth-child(3) .top10-rank { font-size: 29px !important; }
+  .top10-cover, .top10-cover.empty { width: 80px !important; height: 80px !important; }
+  .top10-entry { gap: 12px !important; }
+
+  /* Panel content full width on mobile */
+  .panel-content { width: 100% !important; padding: 14px !important; }
+
+  /* Tabs: smaller on mobile */
+  .tab { padding: 10px 14px !important; font-size: 13px !important; letter-spacing: 1px !important; }
+}
 </style>
 
 <title>Music — DISSECT YOURSELF</title>
