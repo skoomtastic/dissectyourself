@@ -278,6 +278,21 @@ header h1 { font-size:60px; margin:0; text-align:center; letter-spacing:6px; fon
   content: '🏆'; font-size: 16px; position: absolute; top: 0; left: 0;
   filter: sepia(1) saturate(3) hue-rotate(320deg) brightness(0.8);
 }
+
+/* Condemned image */
+.condemned-wrap {
+  margin: 20px auto; line-height:0; overflow:hidden; background:#000;
+  position:relative; width:60%; border:2px solid #440000;
+  cursor:pointer; transition:border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.condemned-wrap:hover {
+  border-color:#880000;
+  box-shadow: 0 0 22px rgba(136,0,0,0.65), 0 0 44px rgba(136,0,0,0.2);
+}
+.condemned-wrap img { width:100%; display:block; }
+
+@keyframes pageFadeIn { from { opacity: 0; } to { opacity: 1; } }
+body { animation: pageFadeIn 0.25s ease-out; }
 </style>
 
 <title>Front Page — DISSECT YOURSELF</title>
@@ -297,7 +312,8 @@ header h1 { font-size:60px; margin:0; text-align:center; letter-spacing:6px; fon
 <a href="/music" class="tab"><span class="boombox-container"><div class="boombox"><div class="cube-face cube-front"><div class="speaker left"></div><div class="speaker right"></div><div class="knob left"></div><div class="knob right"></div><div class="led left"></div><div class="led right"></div></div><div class="cube-face cube-back"></div><div class="cube-face cube-left"></div><div class="cube-face cube-right"></div><div class="cube-face cube-top"></div><div class="cube-face cube-bottom"></div></div></span><span class="text">Music</span></a>
 <a href="/art" class="tab"><span class="paint-container"><div class="paintbrush"><div class="brush-handle"></div><div class="brush-tip"></div></div></span><span class="text">Art/Story</span></a>
 <a href="/worldbuilding" class="tab"><span class="globe-icon"><span></span><span></span></span><span class="text">Worldbuilding</span></a>
-<a href="/links" class="tab"><span class="page-icon"><span></span></span><span class="text">Links</span></a><a href="/top10" class="tab"><span class="trophy-icon"></span><span class="text">Top 10</span></a></nav>
+<a href="/links" class="tab"><span class="page-icon"><span></span></span><span class="text">Links</span></a>
+<a href="/top10" class="tab"><span class="trophy-icon"></span><span class="text">Top 10</span></a></nav>
   <div class="panel-content">
     
 <div class="front-intro">
@@ -322,15 +338,6 @@ header h1 { font-size:60px; margin:0; text-align:center; letter-spacing:6px; fon
   </div>
 </div>
 
-<style>
-.condemned-wrap {
-  margin: 20px auto; line-height:0; overflow:hidden; background:#000;
-  position:relative; width:60%; border:2px solid #440000;
-  cursor:pointer; transition:border-color 0.2s ease;
-}
-.condemned-wrap:hover { border-color:#880000; }
-.condemned-wrap img { width:100%; display:block; }
-</style>
 
 <script>
 const canvas = document.getElementById('grayscaleCanvas');

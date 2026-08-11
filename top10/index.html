@@ -182,6 +182,8 @@ html, body { margin:0; padding:0; font-family:'Share Tech Mono',monospace; backg
 }
 .top10-modal-loading { color:#440000; letter-spacing:2px; font-size:12px; margin-top:10px; }
 
+
+@keyframes pageFadeIn { from { opacity: 0; } to { opacity: 1; } }
 </style>
 <title>Top 10 — DISSECT YOURSELF</title>
 <meta name="description" content="DISSECT YOURSELF – Top 10">
@@ -496,8 +498,8 @@ const CARDGLOW_DUR=4000,CARDFLOAT_DUR=6000;
 const cardEl=document.getElementById('mainCard'),wrapperEl=document.getElementById('mainWrapper');
 cardEl.style.animation='cardglow 4s ease-in-out infinite alternate';
 cardEl.style.animationDelay=-((elapsed%CARDGLOW_DUR)/1000).toFixed(3)+'s';
-wrapperEl.style.animation='cardfloat 6s ease-in-out infinite alternate';
-wrapperEl.style.animationDelay=-((elapsed%CARDFLOAT_DUR)/1000).toFixed(3)+'s';
+wrapperEl.style.animation='pageFadeIn 0.25s ease-out, cardfloat 6s ease-in-out infinite alternate';
+wrapperEl.style.animationDelay='0s, '+(-(elapsed%CARDFLOAT_DUR)/1000).toFixed(3)+'s';
 </script>
 </body>
 </html>

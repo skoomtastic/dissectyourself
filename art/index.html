@@ -278,6 +278,20 @@ header h1 { font-size:60px; margin:0; text-align:center; letter-spacing:6px; fon
   content: '🏆'; font-size: 16px; position: absolute; top: 0; left: 0;
   filter: sepia(1) saturate(3) hue-rotate(320deg) brightness(0.8);
 }
+
+@keyframes pageFadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+#artControls { display: flex; gap: 12px; justify-content: center; margin-bottom: 20px; }
+#artSearchToggle {
+  background: rgba(0,0,0,0.9); border: 2px solid #880000; color: #fff;
+  padding: 10px 22px; font-family: 'Share Tech Mono', monospace; letter-spacing: 3px;
+  cursor: pointer; transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+#artSearchToggle:hover { transform: scale(1.08) skewX(-5deg); box-shadow: 0 0 20px rgba(255,0,0,0.4); }
+#artSearch {
+  width: 260px; padding: 10px 14px; background: rgba(0,0,0,0.85); border: 2px solid #880000;
+  color: #fff; letter-spacing: 2px; outline: none; font-family: 'Share Tech Mono', monospace;
+}
 </style>
 
 <title>Art / Story — DISSECT YOURSELF</title>
@@ -297,10 +311,15 @@ header h1 { font-size:60px; margin:0; text-align:center; letter-spacing:6px; fon
 <a href="/music" class="tab"><span class="boombox-container"><div class="boombox"><div class="cube-face cube-front"><div class="speaker left"></div><div class="speaker right"></div><div class="knob left"></div><div class="knob right"></div><div class="led left"></div><div class="led right"></div></div><div class="cube-face cube-back"></div><div class="cube-face cube-left"></div><div class="cube-face cube-right"></div><div class="cube-face cube-top"></div><div class="cube-face cube-bottom"></div></div></span><span class="text">Music</span></a>
 <a href="/art" class="tab active"><span class="paint-container"><div class="paintbrush"><div class="brush-handle"></div><div class="brush-tip"></div></div></span><span class="text">Art/Story</span></a>
 <a href="/worldbuilding" class="tab"><span class="globe-icon"><span></span><span></span></span><span class="text">Worldbuilding</span></a>
-<a href="/links" class="tab"><span class="page-icon"><span></span></span><span class="text">Links</span></a><a href="/top10" class="tab"><span class="trophy-icon"></span><span class="text">Top 10</span></a></nav>
+<a href="/links" class="tab"><span class="page-icon"><span></span></span><span class="text">Links</span></a>
+<a href="/top10" class="tab"><span class="trophy-icon"></span><span class="text">Top 10</span></a></nav>
   <div class="panel-content">
     
-<div class="art-grid">
+<div id="artControls">
+  <button id="artSearchToggle">SEARCH</button>
+  <input type="text" id="artSearch" placeholder="SEARCH…" autocomplete="off" hidden />
+</div>
+<div class="art-grid" id="artGrid">
   <div class="art-item" data-textfile="../text_art/Chaos Cultist.txt"><h3>Chaos Cultist</h3><img loading="lazy" src="../images/artjpeg/BIO.jpg" class="art-image" alt="Chaos Cultist"></div>
   <div class="art-item" data-textfile="../text_art/Chaos Cult Cyborg.txt"><h3>Chaos Cult Cyborg</h3><img loading="lazy" src="../images/artjpeg/Cyborg.jpg" class="art-image" alt="Chaos Cult Cyborg"></div>
   <div class="art-item" data-textfile="../text_art/CONDEMNED.txt" style="grid-column: span 2;"><h3>CONDEMNED</h3><img loading="lazy" src="../images/art/CONDEMNED.webp" class="art-image" alt="CONDEMNED"></div>
@@ -766,6 +785,43 @@ modalContent.addEventListener('touchstart', function(e) {
 
 
 <script>
+// ── Art search ──
+(function() {
+  const container = document.getElementById('artGrid');
+  const toggleBtn = document.getElementById('artSearchToggle');
+  const search = document.getElementById('artSearch');
+  const items = Array.from(container.querySelectorAll('.art-item'));
+  const originalOrder = [...items];
+  const normalize = t => t.toLowerCase().replace(/^(the|a|an)\s+/i,'').normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+  let searchActive = false;
+
+  function render(list, withHeaders) {
+    container.innerHTML = '';
+    let cur = '';
+    list.forEach(item => {
+      if (withHeaders) {
+        const letter = normalize(item.querySelector('h3').textContent).charAt(0).toUpperCase();
+        if (letter !== cur) { cur = letter; const h = document.createElement('div'); h.className='az-header'; h.textContent=letter; container.appendChild(h); }
+      }
+      container.appendChild(item);
+    });
+  }
+
+  toggleBtn.addEventListener('click', () => {
+    searchActive = !searchActive;
+    if (searchActive) {
+      toggleBtn.textContent = 'CLOSE'; search.hidden = false; search.value = ''; search.focus();
+      render([...originalOrder].sort((a,b)=>normalize(a.querySelector('h3').textContent).localeCompare(normalize(b.querySelector('h3').textContent))), true);
+    } else { toggleBtn.textContent = 'SEARCH'; search.hidden = true; render(originalOrder, false); }
+  });
+
+  search.addEventListener('input', e => {
+    const term = normalize(e.target.value);
+    const filtered = originalOrder.filter(i=>normalize(i.querySelector('h3').textContent).includes(term)).sort((a,b)=>normalize(a.querySelector('h3').textContent).localeCompare(normalize(b.querySelector('h3').textContent)));
+    render(filtered, true);
+  });
+})();
+
 const logoEl = document.querySelector(".site-header img");
 const GLOW_DUR = 3000;
 const GLITCH_DUR = 4000;
@@ -800,5 +856,19 @@ if (!sessionStorage.getItem("logofadedone")) {
     <div id="modalText" class="art-text"></div>
   </div>
 </div>
+
+<script>
+const CARDGLOW_DUR  = 4000;
+const CARDFLOAT_DUR = 6000;
+const _cardEl    = document.getElementById('mainCard');
+const _wrapperEl = document.getElementById('mainWrapper');
+const _now = Date.now();
+if (!sessionStorage.getItem("animStart")) sessionStorage.setItem("animStart", _now);
+const _elapsed = _now - parseInt(sessionStorage.getItem("animStart"));
+_cardEl.style.animation      = 'cardglow 4s ease-in-out infinite alternate';
+_cardEl.style.animationDelay = -((_elapsed % CARDGLOW_DUR) / 1000).toFixed(3) + 's';
+_wrapperEl.style.animation      = 'pageFadeIn 0.25s ease-out, cardfloat 6s ease-in-out infinite alternate';
+_wrapperEl.style.animationDelay = '0s, ' + -((_elapsed % CARDFLOAT_DUR) / 1000).toFixed(3) + 's';
+</script>
 </body>
 </html>
