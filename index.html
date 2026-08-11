@@ -301,14 +301,36 @@ header h1 { font-size:60px; margin:0; text-align:center; letter-spacing:6px; fon
   <div class="panel-content">
     
 <div class="front-intro">
-  <p>Sound, vision, and story collide</p>
   <p>In the aftermath of multiple of my creative projects becoming scattered, I've chosen to compile them into a single website</p>
+
+  <div class="condemned-wrap">
+    <img src="images/art/CONDEMNED.webp" alt="CONDEMNED" id="condemnedImg">
+  </div>
+
   <p><i>To truly know who you are, you've got to <span class="highlight">DISSECT YOURSELF</span> first</i></p>
 </div>
 
   </div>
 </div>
 </div>
+
+<!-- Condemned modal -->
+<div class="art-modal" id="condemnedModal">
+  <div class="art-modal-content">
+    <span class="art-modal-close" id="condemnedModalClose">&times;</span>
+    <img src="images/art/CONDEMNED.webp" alt="CONDEMNED">
+  </div>
+</div>
+
+<style>
+.condemned-wrap {
+  margin: 20px auto; line-height:0; overflow:hidden; background:#000;
+  position:relative; width:60%; border:2px solid #440000;
+  cursor:pointer; transition:border-color 0.2s ease;
+}
+.condemned-wrap:hover { border-color:#880000; }
+.condemned-wrap img { width:100%; display:block; }
+</style>
 
 <script>
 const canvas = document.getElementById('grayscaleCanvas');
@@ -738,6 +760,23 @@ cardEl.style.animationDelay = cardGlowDelay + 's';
 
 wrapperEl.style.animation      = 'cardfloat 6s ease-in-out infinite alternate';
 wrapperEl.style.animationDelay = cardFloatDelay + 's';
+</script>
+<script>
+// Condemned image modal
+const condemnedModal = document.getElementById('condemnedModal');
+document.getElementById('condemnedImg').addEventListener('click', () => {
+  document.body.style.overflow = 'hidden';
+  document.documentElement.style.overflow = 'hidden';
+  condemnedModal.classList.add('active');
+});
+function closeCondemnedModal() {
+  condemnedModal.classList.remove('active');
+  document.body.style.overflow = '';
+  document.documentElement.style.overflow = '';
+}
+document.getElementById('condemnedModalClose').addEventListener('click', closeCondemnedModal);
+condemnedModal.addEventListener('click', e => { if (e.target === condemnedModal) closeCondemnedModal(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeCondemnedModal(); });
 </script>
 </body>
 </html>
