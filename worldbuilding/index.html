@@ -359,7 +359,28 @@ header h1 { font-size:60px; margin:0; text-align:center; letter-spacing:6px; fon
     gap: 12px;
     padding: 16px 10px !important;
   }
-  header.site-header > a img { width: 88vw !important; max-width: 420px !important; height: auto !important; max-height: none !important; }
+  header.site-header > a img { width: 95vw !important; max-width: 480px !important; height: auto !important; max-height: none !important; }
+
+  /* Consistent 2-per-row tab grid on mobile */
+  .tabs { gap: 8px !important; justify-content: center !important; }
+  .tab {
+    flex: 0 0 calc(50% - 8px) !important;
+    max-width: calc(50% - 8px) !important;
+    box-sizing: border-box !important;
+    padding: 10px 6px !important;
+    font-size: 13px !important;
+    letter-spacing: 1px !important;
+    justify-content: center !important;
+    overflow: hidden !important;
+  }
+  /* Keep tab icons from blowing out tab width */
+  .boombox-container, .boombox { width: 34px !important; height: 22px !important; margin-right: 4px !important; }
+  .cube-front, .cube-back, .cube-top, .cube-bottom { width: 34px !important; height: 22px !important; }
+  .cube-left, .cube-right { width: 22px !important; height: 22px !important; }
+  .paintbrush { width: 14px !important; height: 26px !important; }
+  .paint-container { margin-right: 4px !important; }
+  .globe-icon, .page-icon, .trophy-icon, .house-icon { margin-right: 4px !important; }
+
   .site-header > a { grid-column: unset; }
   .site-header > .now-playing { grid-column: unset; justify-self: unset; }
 
