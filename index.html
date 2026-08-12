@@ -67,9 +67,12 @@
 }
 
 .site-header {
-  display: flex; justify-content: center; align-items: center; padding: 20px 0;
+  display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; padding: 20px 20px;
+  overflow: hidden; max-width: 100%; box-sizing: border-box;
 }
-.site-header img {
+.site-header > a { grid-column: 2; }
+.site-header > .now-playing { grid-column: 3; justify-self: center; }
+.site-header > a img {
   height: 200px; width: auto;
   filter: drop-shadow(0 0 8px rgba(255,0,0,0.4));
   animation: pulseGlow 3s ease-in-out infinite, glitch 4s infinite;
@@ -131,11 +134,7 @@ header h1 { font-size:60px; margin:0; text-align:center; letter-spacing:6px; fon
   .tabs { gap: 10px; }
   .tab { padding: 10px 18px; font-size: 14px; }
   header h1 { font-size:36px; }
-  .card {
-  margin: 0; max-width: 100%; width: 100%; padding: 30px;
-  background: rgba(0,0,0,0.85); border: 4px solid #880000; backdrop-filter: blur(8px);
-  position: relative; z-index: 2;
-}
+  .card { padding: 18px; }
 }
 
 /* Panel content */
@@ -278,6 +277,126 @@ header h1 { font-size:60px; margin:0; text-align:center; letter-spacing:6px; fon
   content: '🏆'; font-size: 16px; position: absolute; top: 0; left: 0;
   filter: sepia(1) saturate(3) hue-rotate(320deg) brightness(0.8);
 }
+
+/* Condemned image */
+.condemned-wrap {
+  margin: 20px auto; line-height:0; overflow:hidden; background:#000;
+  position:relative; width:60%; border:2px solid #440000;
+  cursor:pointer; transition:border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.condemned-wrap:hover {
+  border-color:#880000;
+  box-shadow: 0 0 22px rgba(136,0,0,0.65), 0 0 44px rgba(136,0,0,0.2);
+}
+.condemned-wrap img { width:100%; display:block; }
+
+@keyframes pageFadeIn { from { opacity: 0; } to { opacity: 1; } }
+/* Now Playing */
+.now-playing { display: flex; align-items: center; gap: 14px; z-index: 10; }
+@keyframes vinylSpin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+.vinyl-wrap { position: relative; width: 140px; height: 140px; flex-shrink: 0; }
+.vinyl {
+  width: 140px; height: 140px; border-radius: 50%;
+  box-shadow: 0 0 18px rgba(136,0,0,0.5), 0 0 4px rgba(0,0,0,0.9);
+  animation: vinylSpin 4s linear infinite;
+  position: relative; overflow: hidden;
+  background: #111;
+}
+.vinyl-cover {
+  position: absolute; top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 54px; height: 54px;
+  border-radius: 50%; object-fit: cover;
+  pointer-events: none; z-index: 2;
+}
+/* Vinyl grooves overlay */
+.vinyl::before {
+  content: '';
+  position: absolute; inset: 0;
+  border-radius: 50%;
+  background: repeating-radial-gradient(
+    circle at center,
+    transparent 0px,
+    transparent 3px,
+    rgba(0,0,0,0.35) 3px,
+    rgba(0,0,0,0.35) 4px
+  );
+  z-index: 1;
+}
+/* Outer dark edge */
+.vinyl::after {
+  content: '';
+  position: absolute; inset: 0;
+  border-radius: 50%;
+  background: radial-gradient(circle at center,
+    transparent 36%,
+    rgba(0,0,0,0.0) 37%,
+    rgba(0,0,0,0.5) 90%,
+    rgba(0,0,0,0.85) 100%
+  );
+  z-index: 3;
+}
+.vinyl-hole {
+  position: absolute; top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 10px; height: 10px;
+  border-radius: 50%; background: #000;
+  z-index: 4;
+}
+.now-playing-info { display: flex; flex-direction: column; gap: 4px; }
+.now-playing-label { font-size: 9px; letter-spacing: 4px; color: #aa3333; }
+.now-playing-track { font-size: 16px; font-weight: bold; letter-spacing: 2px; color: #fff; text-shadow: 0 0 8px rgba(255,255,255,0.3); }
+.now-playing-artist { font-size: 12px; letter-spacing: 2px; color: #aaa; }
+
+@media (max-width: 600px) {
+  /* Header: stack logo above vinyl on mobile */
+  header.site-header {
+    display: flex !important;
+    flex-direction: column !important;
+    flex-wrap: nowrap !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 12px !important;
+    padding: 16px 10px !important;
+  }
+  .site-header > a { grid-column: unset !important; }
+  .site-header > .now-playing { grid-column: unset !important; justify-self: unset !important; }
+  header.site-header > a img { height: 200px; max-width: 85vw !important; width: auto !important; }
+  .now-playing { max-width: 90vw !important; }
+
+  /* Shrink vinyl on mobile */
+  .vinyl-wrap, .vinyl { width: 80px !important; height: 80px !important; }
+  .vinyl-cover { width: 32px !important; height: 32px !important; }
+  .now-playing-track { font-size: 13px !important; }
+  .now-playing-artist { font-size: 11px !important; }
+
+  /* Art grid: force 2 columns */
+  .art-grid, .album-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+  /* CONDEMNED spans both columns */
+  .art-item[style*="grid-column"] { grid-column: 1 / -1 !important; }
+
+  /* Top 10 title: allow wrapping, smaller font */
+  .top10-title {
+    font-size: 18px !important;
+    white-space: normal !important;
+    word-break: break-word !important;
+    line-height: 1.2 !important;
+  }
+  .top10-rank { font-size: 28px !important; min-width: 32px !important; }
+  .top10-entry:nth-child(1) .top10-rank { font-size: 32px !important; }
+  .top10-entry:nth-child(2) .top10-rank { font-size: 30px !important; }
+  .top10-entry:nth-child(3) .top10-rank { font-size: 29px !important; }
+  .top10-cover, .top10-cover.empty { width: 80px !important; height: 80px !important; }
+  .top10-entry { gap: 12px !important; }
+
+  /* Panel content full width on mobile */
+  .panel-content { width: 100% !important; padding: 14px !important; }
+
+  /* Tabs: smaller on mobile */
+  .tab { padding: 10px 14px !important; font-size: 13px !important; letter-spacing: 1px !important; }
+}
 </style>
 
 <title>Front Page — DISSECT YOURSELF</title>
@@ -292,23 +411,52 @@ header h1 { font-size:60px; margin:0; text-align:center; letter-spacing:6px; fon
 <div class="card" id="mainCard" style="margin:0;">
   <header class="site-header">
     <a href="/"><img src="images/dissectyourself2.png" alt="DISSECT YOURSELF"></a>
+    <div class="now-playing">
+      <div class="vinyl-wrap">
+        <div class="vinyl">
+          <img src="images/artjpeg/ataraxia.jpg" alt="Ataraxia" class="vinyl-cover">
+          <div class="vinyl-hole"></div>
+        </div>
+      </div>
+      <div class="now-playing-info">
+        <div class="now-playing-label">ON REPEAT</div>
+        <div class="now-playing-track">Ataraxia</div>
+        <div class="now-playing-artist">Allt</div>
+
+      </div>
+    </div>
   </header>
+
   <nav class="tabs"><a href="/" class="tab active"><span class="house-icon"><span class="body"></span><span class="door"></span></span><span class="text">Front Page</span></a>
 <a href="/music" class="tab"><span class="boombox-container"><div class="boombox"><div class="cube-face cube-front"><div class="speaker left"></div><div class="speaker right"></div><div class="knob left"></div><div class="knob right"></div><div class="led left"></div><div class="led right"></div></div><div class="cube-face cube-back"></div><div class="cube-face cube-left"></div><div class="cube-face cube-right"></div><div class="cube-face cube-top"></div><div class="cube-face cube-bottom"></div></div></span><span class="text">Music</span></a>
 <a href="/art" class="tab"><span class="paint-container"><div class="paintbrush"><div class="brush-handle"></div><div class="brush-tip"></div></div></span><span class="text">Art/Story</span></a>
 <a href="/worldbuilding" class="tab"><span class="globe-icon"><span></span><span></span></span><span class="text">Worldbuilding</span></a>
-<a href="/links" class="tab"><span class="page-icon"><span></span></span><span class="text">Links</span></a><a href="/top10" class="tab"><span class="trophy-icon"></span><span class="text">Top 10</span></a></nav>
+<a href="/links" class="tab"><span class="page-icon"><span></span></span><span class="text">Links</span></a>
+<a href="/top10" class="tab"><span class="trophy-icon"></span><span class="text">Top 10</span></a></nav>
   <div class="panel-content">
     
 <div class="front-intro">
-  <p>Sound, vision, and story collide</p>
   <p>In the aftermath of multiple of my creative projects becoming scattered, I've chosen to compile them into a single website</p>
+
+  <div class="condemned-wrap">
+    <img src="images/art/CONDEMNED.webp" alt="CONDEMNED" id="condemnedImg">
+  </div>
+
   <p><i>To truly know who you are, you've got to <span class="highlight">DISSECT YOURSELF</span> first</i></p>
 </div>
 
   </div>
 </div>
 </div>
+
+<!-- Condemned modal -->
+<div class="art-modal" id="condemnedModal">
+  <div class="art-modal-content">
+    <span class="art-modal-close" id="condemnedModalClose">&times;</span>
+    <img src="images/art/CONDEMNED.webp" alt="CONDEMNED">
+  </div>
+</div>
+
 
 <script>
 const canvas = document.getElementById('grayscaleCanvas');
@@ -699,7 +847,7 @@ drawAll(0);
 
 
 <script>
-const logoEl = document.querySelector(".site-header img");
+const logoEl = document.querySelector(".site-header > a img");
 const GLOW_DUR = 3000;
 const GLITCH_DUR = 4000;
 const now = Date.now();
@@ -736,8 +884,34 @@ const cardFloatDelay = -((elapsed % CARDFLOAT_DUR) / 1000).toFixed(3);
 cardEl.style.animation      = 'cardglow 4s ease-in-out infinite alternate';
 cardEl.style.animationDelay = cardGlowDelay + 's';
 
-wrapperEl.style.animation      = 'cardfloat 6s ease-in-out infinite alternate';
-wrapperEl.style.animationDelay = cardFloatDelay + 's';
+wrapperEl.style.animation      = 'pageFadeIn 0.25s ease-out, cardfloat 6s ease-in-out infinite alternate';
+wrapperEl.style.animationDelay = '0s, ' + cardFloatDelay + 's';
+
+// ── Vinyl spin sync ──
+const vinylEl = document.querySelector('.vinyl');
+if (vinylEl) {
+  const VINYL_DUR = 4000;
+  const vinylElapsed = Date.now() - parseInt(sessionStorage.getItem("animStart") || Date.now());
+  const vinylDelay = -((vinylElapsed % VINYL_DUR) / 1000).toFixed(3);
+  vinylEl.style.animationDelay = vinylDelay + 's';
+}
+</script>
+<script>
+// Condemned image modal
+const condemnedModal = document.getElementById('condemnedModal');
+document.getElementById('condemnedImg').addEventListener('click', () => {
+  document.body.style.overflow = 'hidden';
+  document.documentElement.style.overflow = 'hidden';
+  condemnedModal.classList.add('active');
+});
+function closeCondemnedModal() {
+  condemnedModal.classList.remove('active');
+  document.body.style.overflow = '';
+  document.documentElement.style.overflow = '';
+}
+document.getElementById('condemnedModalClose').addEventListener('click', closeCondemnedModal);
+condemnedModal.addEventListener('click', e => { if (e.target === condemnedModal) closeCondemnedModal(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeCondemnedModal(); });
 </script>
 </body>
 </html>
