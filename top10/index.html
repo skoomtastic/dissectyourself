@@ -660,6 +660,23 @@ if (vinylEl) {
   const vinylDelay = -((vinylElapsed % VINYL_DUR) / 1000).toFixed(3);
   vinylEl.style.animationDelay = vinylDelay + 's';
 }
+
+// ── Tab icon animation sync ──
+(function () {
+  const started = parseInt(sessionStorage.getItem("animStart") || Date.now());
+  const since = Date.now() - started;
+  const sync = (selector, anim, duration) => {
+    document.querySelectorAll(selector).forEach(el => {
+      el.style.animation = anim;
+      el.style.animationDelay = '-' + ((since % duration) / 1000).toFixed(3) + 's';
+    });
+  };
+  sync('.boombox',     'rotate3d 4s linear infinite',          4000);
+  sync('.paintbrush',  'brushrotate 2s linear infinite',       2000);
+  sync('.house-icon, .page-icon, .globe-icon, .trophy-icon', 'floatPage 4s ease-in-out infinite', 4000);
+  sync('.led.left',   'blink1 0.9s infinite',                  900);
+  sync('.led.right',  'blink2 1.3s infinite',                  1300);
+})();
 </script>
 </body>
 </html>

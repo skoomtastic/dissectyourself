@@ -10,8 +10,7 @@
 /* House icon */
 .house-icon {
   position: relative; width: 22px; height: 18px; margin-right: 6px;
-  display: inline-block; vertical-align: middle; animation: floatPage 4s ease-in-out infinite;
-}
+  display: inline-block; vertical-align: middle; }
 .house-icon .body {
   position: absolute; bottom: 0; left: 3px; width: 16px; height: 12px;
   background: #111; border: 2px solid #c11717; box-shadow: inset 0 0 0 0.5px #c11717;
@@ -29,8 +28,7 @@
   position: relative; width: 20px; height: 24px; background: #111;
   border: 2px solid #ffffff; border-radius: 2px; margin-right: 6px;
   display: inline-block; vertical-align: middle; box-shadow: inset 0 0 0 0.5px #ffffff;
-  animation: floatPage 4s ease-in-out infinite;
-}
+  }
 .page-icon::before, .page-icon::after {
   content: ''; position: absolute; left: 3px; right: 3px; height: 2px;
   background: #ffffff; transform: rotate(-1deg);
@@ -43,8 +41,7 @@
 .globe-icon {
   position: relative; width: 24px; height: 24px; border: 2px solid #ff4c4c;
   border-radius: 50%; margin-right: 6px; display: inline-block; vertical-align: middle;
-  background: #111; animation: floatPage 4s ease-in-out infinite;
-}
+  background: #111; }
 .globe-icon::before {
   content: ''; position: absolute; top: 50%; left: 10%; right: 10%; height: 2px;
   background: #ff4c4c; transform: translateY(-50%);
@@ -191,7 +188,7 @@ header h1 { font-size:60px; margin:0; text-align:center; letter-spacing:6px; fon
 
 /* Boombox */
 .boombox-container { margin-right:8px; }
-.boombox { width:60px; height:40px; position: relative; transform-style: preserve-3d; transform-origin: center center; animation: rotate3d 4s linear infinite; }
+.boombox { width:60px; height:40px; position: relative; transform-style: preserve-3d; transform-origin: center center; }
 .cube-face { position:absolute; box-sizing:border-box; border:2px solid #880000; }
 .cube-front { width:60px; height:40px; background:#ff0000; transform: translateZ(20px); }
 .cube-back  { width:60px; height:40px; background:#aa0000; transform: rotateY(180deg) translateZ(20px); }
@@ -214,7 +211,7 @@ header h1 { font-size:60px; margin:0; text-align:center; letter-spacing:6px; fon
 
 /* Paintbrush */
 .paint-container { margin-right:8px; }
-.paintbrush { width:20px; height:40px; position:relative; transform-origin:center center; animation: brushrotate 2s linear infinite; }
+.paintbrush { width:20px; height:40px; position:relative; transform-origin:center center; }
 .brush-handle { width:6px; height:30px; background:#8B4513; position:absolute; bottom:0; left:7px; border-radius:2px; }
 .brush-tip { width:12px; height:10px; background:#FF0000; position:absolute; top:0; left:4px; border-radius:2px; }
 @keyframes brushrotate {0%{transform:rotate(-10deg);}50%{transform:rotate(10deg);}100%{transform:rotate(-10deg);}}
@@ -274,8 +271,7 @@ header h1 { font-size:60px; margin:0; text-align:center; letter-spacing:6px; fon
 /* Trophy icon */
 .trophy-icon {
   position: relative; width: 22px; height: 22px; margin-right: 6px;
-  display: inline-block; vertical-align: middle; animation: floatPage 4s ease-in-out infinite;
-}
+  display: inline-block; vertical-align: middle; }
 .trophy-icon::before {
   content: '🏆'; font-size: 16px; position: absolute; top: 0; left: 0;
   filter: sepia(1) saturate(3) hue-rotate(320deg) brightness(0.8);
@@ -893,6 +889,23 @@ if (vinylEl) {
   const vinylDelay = -((vinylElapsed % VINYL_DUR) / 1000).toFixed(3);
   vinylEl.style.animationDelay = vinylDelay + 's';
 }
+
+// ── Tab icon animation sync ──
+(function () {
+  const started = parseInt(sessionStorage.getItem("animStart") || Date.now());
+  const since = Date.now() - started;
+  const sync = (selector, anim, duration) => {
+    document.querySelectorAll(selector).forEach(el => {
+      el.style.animation = anim;
+      el.style.animationDelay = '-' + ((since % duration) / 1000).toFixed(3) + 's';
+    });
+  };
+  sync('.boombox',     'rotate3d 4s linear infinite',          4000);
+  sync('.paintbrush',  'brushrotate 2s linear infinite',       2000);
+  sync('.house-icon, .page-icon, .globe-icon, .trophy-icon', 'floatPage 4s ease-in-out infinite', 4000);
+  sync('.led.left',   'blink1 0.9s infinite',                  900);
+  sync('.led.right',  'blink2 1.3s infinite',                  1300);
+})();
 </script>
 </body>
 </html>
